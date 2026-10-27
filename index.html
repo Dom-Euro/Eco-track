@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EcoTrack</title>
+    <meta
+      name="description"
+      content="EcoTrack helps schools manage and interpret sustainability data."
+    />
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Main navigation">
+        <div class="brand" tabindex="0">
+          <div class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 64 64" focusable="false">
+              <path d="M32 6c10.5 9 17 17.4 17 27A17 17 0 0 1 32 50 17 17 0 0 1 15 33c0-9.6 6.5-18 17-27Zm-6 28c2.2 3.5 5 6.1 8 7.7 3-1.6 5.8-4.2 8-7.7-1.2-3.7-4.4-6.2-8-6.2s-6.8 2.5-8 6.2Z" />
+            </svg>
+          </div>
+          <div>
+            <p class="brand-name">EcoTrack</p>
+            <span class="brand-tag">Sustainability Data</span>
+          </div>
+        </div>
+
+        <nav class="nav" aria-label="Site sections">
+          <button class="nav-link active" data-page="dashboard" type="button">
+            Dashboard
+          </button>
+          <button class="nav-link" data-page="data" type="button">
+            Sustainability Data
+          </button>
+          <button class="nav-link" data-page="add-data" type="button">
+            Add Data
+          </button>
+          <button class="nav-link" data-page="analytics" type="button">
+            Analytics
+          </button>
+          <button class="nav-link" data-page="goals" type="button">
+            Goals and Recommendations
+          </button>
+          <button class="nav-link" data-page="about" type="button">
+            About EcoTrack
+          </button>
+        </nav>
+      </aside>
+
+      <main class="main-panel">
+        <header class="topbar">
+          <div class="topbar-title">
+            <h1 id="pageTitle">School Sustainability Dashboard</h1>
+          </div>
+          <div class="topbar-actions">
+            <button id="loadDemoDataBtn" class="button button-secondary" type="button">
+              Load Demo Data
+            </button>
+            <button id="clearDataBtn" class="button button-danger" type="button">
+              Clear All Data
+            </button>
+          </div>
+        </header>
+
+        <div id="demoNotice" class="demo-banner" aria-live="polite">
+          DEMO DATA — NOT ACTUAL SCHOOL MEASUREMENTS
+        </div>
+
+        <section id="page-dashboard" class="page-panel active" aria-labelledby="pageTitle">
+          <div class="welcome-card card">
+            <div>
+              <p class="eyebrow">School sustainability dashboard</p>
+              <h2>School Sustainability Dashboard</h2>
+              <p class="subtitle">Track resources. Understand impact. Improve together.</p>
+              <div id="dashboardReportPeriod" class="status-inline"></div>
+              <div id="dashboardDataStatus" class="status-inline muted"></div>
+            </div>
+            <button id="goToAddDataBtn" class="button" type="button">Add New Data</button>
+          </div>
+
+          <div class="summary-grid" aria-label="Summary statistics">
+            <article class="stat-card card">
+              <div class="stat-header">
+                <span class="stat-label">Electricity Usage</span>
+                <span class="stat-unit">kWh</span>
+              </div>
+              <div id="electricityValue" class="stat-value">0</div>
+              <div id="electricityTrend" class="stat-trend">No comparison yet</div>
+            </article>
+
+            <article class="stat-card card">
+              <div class="stat-header">
+                <span class="stat-label">Water Usage</span>
+                <span class="stat-unit">kL</span>
+              </div>
+              <div id="waterValue" class="stat-value">0</div>
+              <div id="waterTrend" class="stat-trend">No comparison yet</div>
+            </article>
+
+            <article class="stat-card card">
+              <div class="stat-header">
+                <span class="stat-label">Waste Generated</span>
+                <span class="stat-unit">kg</span>
+              </div>
+              <div id="wasteValue" class="stat-value">0</div>
+              <div id="wasteTrend" class="stat-trend">No comparison yet</div>
+            </article>
+
+            <article class="stat-card card">
+              <div class="stat-header">
+                <span class="stat-label">Waste Diverted</span>
+                <span class="stat-unit">%</span>
+              </div>
+              <div id="divertedValue" class="stat-value">0%</div>
+              <div id="divertedTrend" class="stat-trend">No comparison yet</div>
+            </article>
+          </div>
+
+          <section class="card">
+            <div class="section-header compact">
+              <h3>Reporting period</h3>
+            </div>
+            <label class="field-label" for="dashboardDateFilter">Select period</label>
+            <select id="dashboardDateFilter" class="input-field">
+              <option value="7">Last 7 days</option>
+              <option value="30" selected>Last 30 days</option>
+              <option value="90">Last 90 days</option>
+              <option value="all">All available data</option>
+            </select>
+          </section>
+
+          <section class="card table-card">
+            <div class="section-header">
+              <h3>Recent records</h3>
+              <button id="viewAllRecordsBtn" class="text-button" type="button">View all records</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">Date</th>
+                    <th scope="col">Resource type</th>
+                    <th scope="col">Value</th>
+                    <th scope="col">Unit</th>
+                    <th scope="col">Location</th>
+                    <th scope="col">Data source</th>
+                  </tr>
+                </thead>
+                <tbody id="recentRecordsTableBody"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="card status-card">
+            <div class="section-header compact">
+              <h3>Data status</h3>
+            </div>
+            <div class="status-grid">
+              <div>
+                <p class="status-label">Records available</p>
+                <p id="recordsCount" class="status-value">0</p>
+              </div>
+              <div>
+                <p class="status-label">Latest measurement date</p>
+                <p id="latestDateValue" class="status-value">—</p>
+              </div>
+              <div>
+                <p class="status-label">Data type</p>
+                <p id="dataTypeValue" class="status-value">—</p>
+              </div>
+              <div>
+                <p class="status-label">Review needed</p>
+                <p id="reviewStatusValue" class="status-value">—</p>
+              </div>
+            </div>
+          </section>
+        </section>
+
+        <section id="page-data" class="page-panel" aria-labelledby="dataHeading">
+          <div class="page-head">
+            <div>
+              <p class="eyebrow">Record management</p>
+              <h2 id="dataHeading">Sustainability Data</h2>
+            </div>
+          </div>
+
+          <section class="card filter-card">
+            <div class="filters-grid">
+              <div>
+                <label class="field-label" for="dataResourceFilter">Resource type</label>
+                <select id="dataResourceFilter" class="input-field">
+                  <option value="all">All</option>
+                  <option value="Electricity">Electricity</option>
+                  <option value="Water">Water</option>
+                  <option value="Waste generated">Waste generated</option>
+                  <option value="Waste diverted">Waste diverted</option>
+                </select>
+              </div>
+              <div>
+                <label class="field-label" for="dataFromDate">From</label>
+                <input id="dataFromDate" class="input-field" type="date" />
+              </div>
+              <div>
+                <label class="field-label" for="dataToDate">To</label>
+                <input id="dataToDate" class="input-field" type="date" />
+              </div>
+              <div>
+                <label class="field-label" for="dataSearchInput">Search</label>
+                <input id="dataSearchInput" class="input-field" type="search" placeholder="Location or source" />
+              </div>
+            </div>
+          </section>
+
+          <div class="list-layout">
+            <section class="card table-card">
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th scope="col">Date</th>
+                      <th scope="col">Type</th>
+                      <th scope="col">Value</th>
+                      <th scope="col">Unit</th>
+                      <th scope="col">Location</th>
+                      <th scope="col">Source</th>
+                      <th scope="col">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="recordsTableBody"></tbody>
+                </table>
+              </div>
+            </section>
+
+            <aside class="card detail-card" aria-live="polite">
+              <h3>Record details</h3>
+              <div id="recordDetailPanel" class="record-detail-panel">
+                <p>Select a record to view more detail.</p>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <section id="page-add-data" class="page-panel" aria-labelledby="addDataHeading">
+          <div class="page-head">
+            <div>
+              <p class="eyebrow">Data collection</p>
+              <h2 id="addDataHeading">Add Data</h2>
+            </div>
+          </div>
+
+          <form id="addDataForm" class="card form-card" novalidate>
+            <input id="recordId" type="hidden" />
+
+            <div class="form-grid">
+              <div>
+                <label class="field-label" for="measurementDate">Measurement date</label>
+                <input id="measurementDate" class="input-field" type="date" required />
+                <p id="measurementDateError" class="field-error" aria-live="polite"></p>
+              </div>
+
+              <div>
+                <label class="field-label" for="resourceType">Resource type</label>
+                <select id="resourceType" class="input-field" required>
+                  <option value="">Select resource</option>
+                  <option value="Electricity">Electricity</option>
+                  <option value="Water">Water</option>
+                  <option value="Waste generated">Waste generated</option>
+                  <option value="Waste diverted">Waste diverted</option>
+                </select>
+                <p id="resourceTypeError" class="field-error" aria-live="polite"></p>
+              </div>
+
+              <div>
+                <label class="field-label" for="measurementValue">Numerical value</label>
+                <input id="measurementValue" class="input-field" type="number" step="0.01" min="0" required />
+                <p id="measurementValueError" class="field-error" aria-live="polite"></p>
+              </div>
+
+              <div>
+                <label class="field-label" for="measurementUnit">Unit</label>
+                <select id="measurementUnit" class="input-field" required>
+                  <option value="">Select unit</option>
+                </select>
+                <p id="measurementUnitError" class="field-error" aria-live="polite"></p>
+              </div>
+
+              <div>
+                <label class="field-label" for="locationField">Location or area</label>
+                <input id="locationField" class="input-field" type="text" placeholder="e.g. Science block" />
+              </div>
+
+              <div>
+                <label class="field-label" for="dataSource">Data source</label>
+                <input id="dataSource" class="input-field" type="text" placeholder="e.g. School utility report" required />
+                <p id="dataSourceError" class="field-error" aria-live="polite"></p>
+              </div>
+            </div>
+
+            <div class="notes-block">
+              <label class="field-label" for="measurementNotes">Notes</label>
+              <textarea id="measurementNotes" class="input-field" rows="4" placeholder="Optional context, conditions, or notes"></textarea>
+            </div>
+
+            <div class="form-actions">
+              <button id="submitRecordBtn" class="button" type="submit">Save record</button>
+              <button id="resetFormBtn" class="button button-secondary" type="button">Reset form</button>
+            </div>
+            <div id="formStatus" class="form-status" aria-live="polite"></div>
+          </form>
+        </section>
+
+        <section id="page-analytics" class="page-panel" aria-labelledby="analyticsHeading">
+          <div class="page-head">
+            <div>
+              <p class="eyebrow">Data visualisation</p>
+              <h2 id="analyticsHeading">Analytics</h2>
+            </div>
+          </div>
+
+          <section class="card analytics-controls">
+            <div class="filters-grid compact">
+              <div>
+                <label class="field-label" for="analyticsResourceFilter">Resource type</label>
+                <select id="analyticsResourceFilter" class="input-field">
+                  <option value="Electricity">Electricity</option>
+                  <option value="Water">Water</option>
+                  <option value="Waste generated">Waste generated</option>
+                  <option value="Waste diverted">Waste diverted</option>
+                </select>
+              </div>
+              <div>
+                <label class="field-label" for="analyticsPeriodFilter">Reporting period</label>
+                <select id="analyticsPeriodFilter" class="input-field">
+                  <option value="7">Last 7 days</option>
+                  <option value="30" selected>Last 30 days</option>
+                  <option value="90">Last 90 days</option>
+                  <option value="all">All available data</option>
+                </select>
+              </div>
+            </div>
+          </section>
+
+          <div id="analyticsSummary" class="analysis-summary card"></div>
+
+          <div class="chart-grid">
+            <article class="card chart-card">
+              <h3>Electricity usage over time</h3>
+              <canvas id="chartElectricity" aria-label="Electricity usage chart"></canvas>
+            </article>
+
+            <article class="card chart-card">
+              <h3>Water usage over time</h3>
+              <canvas id="chartWater" aria-label="Water usage chart"></canvas>
+            </article>
+
+            <article class="card chart-card">
+              <h3>Waste breakdown</h3>
+              <canvas id="chartWasteBreakdown" aria-label="Waste breakdown chart"></canvas>
+            </article>
+
+            <article class="card chart-card">
+              <h3>Resource comparison</h3>
+              <canvas id="chartComparison" aria-label="Resource comparison chart"></canvas>
+            </article>
+          </div>
+        </section>
+
+        <section id="page-goals" class="page-panel" aria-labelledby="goalsHeading">
+          <div class="page-head">
+            <div>
+              <p class="eyebrow">Targets and planning</p>
+              <h2 id="goalsHeading">Goals and Recommendations</h2>
+            </div>
+          </div>
+
+          <section class="card goals-layout">
+            <div class="goal-form-wrap">
+              <h3>Set a goal</h3>
+              <form id="goalForm" novalidate>
+                <div class="form-grid">
+                  <div>
+                    <label class="field-label" for="goalName">Goal name</label>
+                    <input id="goalName" class="input-field" type="text" required />
+                  </div>
+                  <div>
+                    <label class="field-label" for="goalResource">Resource type</label>
+                    <select id="goalResource" class="input-field" required>
+                      <option value="Electricity">Electricity</option>
+                      <option value="Water">Water</option>
+                      <option value="Waste diverted">Waste diverted</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="field-label" for="goalBaseline">Baseline value</label>
+                    <input id="goalBaseline" class="input-field" type="number" step="0.01" min="0" required />
+                  </div>
+                  <div>
+                    <label class="field-label" for="goalTarget">Target value</label>
+                    <input id="goalTarget" class="input-field" type="number" step="0.01" min="0" required />
+                  </div>
+                  <div>
+                    <label class="field-label" for="goalDate">Target date</label>
+                    <input id="goalDate" class="input-field" type="date" required />
+                  </div>
+                  <div>
+                    <label class="field-label" for="studentCount">Student enrolment</label>
+                    <input id="studentCount" class="input-field" type="number" min="1" step="1" value="900" />
+                  </div>
+                </div>
+                <div class="form-actions">
+                  <button class="button" type="submit">Save goal</button>
+                </div>
+                <div id="goalFormStatus" class="form-status" aria-live="polite"></div>
+              </form>
+            </div>
+
+            <div class="benchmark-wrap">
+              <h3>Benchmark note</h3>
+              <p class="benchmark-text">
+                Victorian Department of Education benchmarks are reference figures for utility use, not guaranteed averages for every school. A valid comparison requires matching dates, the relevant student enrolment, and compatible units.
+              </p>
+              <ul class="benchmark-list">
+                <li>Secondary-school electricity benchmark: 400 kWh per student per year.</li>
+                <li>Mains water benchmark: 4 kL per student per year.</li>
+                <li>Waste to landfill benchmark: 0.3 m³ per student per year.</li>
+              </ul>
+              <div id="benchmarkOutput" class="benchmark-output"></div>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="section-header">
+              <h3>Saved goals</h3>
+            </div>
+            <div id="goalList" class="goal-list"></div>
+          </section>
+
+          <section class="card">
+            <div class="section-header compact">
+              <h3>Recommendations</h3>
+            </div>
+            <div id="recommendationList" class="recommendation-list"></div>
+          </section>
+        </section>
+
+        <section id="page-about" class="page-panel" aria-labelledby="aboutHeading">
+          <div class="page-head">
+            <div>
+              <p class="eyebrow">About the project</p>
+              <h2 id="aboutHeading">About EcoTrack</h2>
+            </div>
+          </div>
+
+          <div class="card about-content">
+            <h3>Purpose</h3>
+            <p>
+              EcoTrack helps schools organise and understand their sustainability data in one simple place. It provides a clear way to record, review and compare electricity, water and waste information.
+            </p>
+
+            <h3>Intended users</h3>
+            <p>Students, teachers, and sustainability coordinators can use the site to collect and interpret resource-use data.</p>
+
+            <h3>Main features</h3>
+            <ul>
+              <li>Sustainability dashboard</li>
+              <li>Data entry and record management</li>
+              <li>Charts and analysis</li>
+              <li>Benchmark comparison guidance</li>
+              <li>Goal tracking</li>
+              <li>CSV import and export</li>
+            </ul>
+
+            <h3>Limitations</h3>
+            <p>
+              EcoTrack does not automatically connect to school meters. Data must be entered manually or imported. Browser localStorage is stored in the current device and is not a shared school database. Data quality affects the reliability of conclusions, and benchmarks are reference figures rather than exact school averages.
+            </p>
+
+            <h3>Sustainability connection</h3>
+            <p>
+              Monitoring consumption and waste supports responsible resource use, improved awareness and better decision-making. This connects with the United Nations Sustainable Development Goals for responsible consumption and climate action.
+            </p>
+            <ul>
+              <li><a href="https://sdgs.un.org/goals/goal12" target="_blank" rel="noreferrer">SDG 12: Responsible Consumption and Production</a></li>
+              <li><a href="https://sdgs.un.org/goals/goal13" target="_blank" rel="noreferrer">SDG 13: Climate Action</a></li>
+            </ul>
+
+            <h3>Privacy and security</h3>
+            <p>
+              This prototype does not collect student names, passwords or sensitive information. It does not provide a real authentication system and stores data in browser localStorage only. A production system would require server-side authentication, secure data storage, backups and access control.
+            </p>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div id="toast" class="toast" aria-live="polite"></div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
