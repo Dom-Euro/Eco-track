@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # EcoTrack: A School Sustainability Data Platform
 
 ## Project purpose
@@ -134,3 +135,6 @@ Open the website in a browser and test the following:
 - United Nations. Goal 13: Take urgent action to combat climate change and its impacts.
 
 This project was created as a local prototype for a Year 11 Applied Computing assessment. It prioritises functionality, clear data handling, and understandable JavaScript over advanced production architecture.
+=======
+# Eco-track
+>>>>>>> bb11d2613275dfc737b1ca6a73270614013b9d3a
